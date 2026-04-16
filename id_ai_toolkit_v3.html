@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工业设计 AI 工具库 · XJTU Industrial Design AI Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+SC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08080e;--surface:#0f0f18;--card:#131320;--card2:#17172a;
+  --border:#252538;--border2:#1e1e32;
+  --accent:#c8f03c;--accent2:#4ab8ff;--accent3:#ff6b3d;--accent4:#a855f7;
+  --text:#e4e4f0;--muted:#60608a;--muted2:#8888aa;
+  --p1:#c8f03c;--p2:#3cffc8;--p3:#4ab8ff;--p4:#a855f7;
+  --p5:#ff4aaa;--p6:#ff6b3d;--p7:#4afff0;--p8:#ffd93d;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',sans-serif;font-weight:300;overflow-x:hidden;}
+.cur,.cur-r{position:fixed;pointer-events:none;z-index:9999;border-radius:50%;transform:translate(-50%,-50%);}
+.cur{width:10px;height:10px;background:var(--accent);mix-blend-mode:difference;}
+.cur-r{width:32px;height:32px;border:1px solid rgba(200,240,60,.35);transition:width .3s,height .3s;opacity:.5;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 64px 72px;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 50%,rgba(200,240,60,.06),transparent 60%),radial-gradient(ellipse 60% 80% at 80% 20%,rgba(74,184,255,.04),transparent 60%);}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(200,240,60,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(200,240,60,.03) 1px,transparent 1px);background-size:56px 56px;animation:gm 25s linear infinite;}
+@keyframes gm{to{background-position:56px 56px;}}
+.inst-badge{position:absolute;top:40px;left:64px;right:64px;display:flex;align-items:flex-start;justify-content:space-between;z-index:2;}
+.inst-left{display:flex;flex-direction:column;gap:5px;}
+.inst-name{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;}
+.inst-project{font-size:12px;color:var(--muted2);font-weight:400;letter-spacing:.04em;max-width:520px;line-height:1.6;}
+.inst-right{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;text-align:right;white-space:nowrap;}
+.hero-tag{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--muted2);text-transform:uppercase;margin-bottom:18px;position:relative;z-index:1;}
+.hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(40px,7.5vw,106px);line-height:.88;letter-spacing:-.03em;position:relative;z-index:1;}
+.h1-a{color:var(--text);}
+.h1-b{color:transparent;-webkit-text-stroke:1px rgba(200,240,60,.45);}
+.h1-c{color:var(--accent);}
+.hero-sub{margin-top:28px;max-width:580px;font-size:14px;line-height:1.9;color:var(--muted2);position:relative;z-index:1;}
+.hero-stats{display:flex;gap:48px;margin-top:44px;position:relative;z-index:1;}
+.stat{display:flex;flex-direction:column;gap:3px;}
+.stat-n{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--accent);}
+.stat-l{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
+
+/* NAV */
+.top-nav{position:sticky;top:0;z-index:100;background:rgba(8,8,14,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-scroll{display:flex;overflow-x:auto;scrollbar-width:none;padding:0 64px;}
+.nav-scroll::-webkit-scrollbar{display:none;}
+.nav-btn{font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:none;border:none;padding:14px 18px;cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;flex-shrink:0;}
+.nav-btn:hover{color:var(--text);}
+.nav-btn.active{color:var(--accent);}
+.nav-btn.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);}
+.nav-btn.spec{color:var(--p8);}
+.nav-btn.spec.active::after{background:var(--p8);}
+
+/* SEARCH */
+.search-bar{padding:22px 64px;position:relative;z-index:1;}
+.search-wrap{position:relative;max-width:560px;}
+.s-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted);}
+#searchInput{width:100%;background:var(--card);border:1px solid var(--border);border-radius:3px;padding:11px 14px 11px 40px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;outline:none;transition:border-color .2s;}
+#searchInput:focus{border-color:var(--accent);}
+#searchInput::placeholder{color:var(--muted);}
+
+/* MAIN */
+.main{padding:0 64px 120px;position:relative;z-index:1;}
+
+/* PHASE SECTION */
+.phase-sec{margin-bottom:90px;opacity:0;transform:translateY(28px);transition:opacity .6s,transform .6s;}
+.phase-sec.vis{opacity:1;transform:none;}
+.phase-hdr{display:flex;align-items:baseline;gap:20px;margin-bottom:32px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.ph-num{font-family:'Syne',sans-serif;font-size:60px;font-weight:800;line-height:1;opacity:.07;letter-spacing:-.05em;flex-shrink:0;}
+.ph-info{flex:1;}
+.ph-title{font-family:'Syne',sans-serif;font-weight:700;font-size:23px;display:flex;align-items:center;gap:12px;}
+.ph-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;animation:pd 2s ease-in-out infinite;}
+@keyframes pd{0%,100%{transform:scale(1);}50%{transform:scale(1.5);opacity:.6;}}
+.ph-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.13em;text-transform:uppercase;margin-top:6px;}
+.ph-cnt{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);padding:5px 10px;border:1px solid var(--border);border-radius:2px;white-space:nowrap;flex-shrink:0;}
+
+/* TOOL GRID */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:13px;}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:20px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;text-decoration:none;color:inherit;transition:border-color .3s,transform .25s,box-shadow .25s;}
+.tool-card:hover{transform:translateY(-3px);box-shadow:0 14px 44px rgba(0,0,0,.55);}
+.tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--pc,var(--accent));transform:scaleX(0);transform-origin:left;transition:transform .3s;}
+.tool-card:hover::before{transform:scaleX(1);}
+.tool-card::after{content:'↗';position:absolute;top:16px;right:16px;font-size:13px;color:var(--muted);transition:color .2s,transform .2s;}
+.tool-card:hover::after{color:var(--pc,var(--accent));transform:translate(2px,-2px);}
+.t-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;padding-right:22px;}
+.t-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.tag{font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;background:var(--surface);border:1px solid var(--border);border-radius:2px;color:var(--muted);}
+.tag.hl{border-color:var(--pc,var(--accent));color:var(--pc,var(--accent));background:transparent;}
+.t-desc{font-size:12.5px;line-height:1.75;color:var(--muted2);flex:1;}
+.t-meta{display:flex;justify-content:space-between;align-items:center;padding-top:9px;border-top:1px solid var(--border2);}
+.t-price{font-family:'Space Mono',monospace;font-size:9.5px;}
+.t-price.free{color:#3cff8a;}.t-price.fm{color:var(--accent2);}.t-price.paid{color:var(--accent3);}
+.t-plat{font-family:'Space Mono',monospace;font-size:8.5px;color:var(--muted);}
+
+/* ─── COMMUNITY MODULE ─── */
+.comm-module{background:var(--card2);border:1px solid var(--border);border-radius:3px;padding:20px 24px;margin-top:16px;}
+.comm-top{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.comm-dot{width:6px;height:6px;border-radius:50%;background:var(--pc,var(--accent));flex-shrink:0;}
+.comm-title-t{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+.comm-sub{font-family:'Space Mono',monospace;font-size:9.5px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;}
+
+/* Tutorial cards within community module */
+.tut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:16px;}
+.tut-card{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:14px 16px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:7px;transition:border-color .2s,background .2s;position:relative;}
+.tut-card:hover{border-color:var(--pc,var(--accent));background:var(--card);}
+.tut-card::after{content:'↗';position:absolute;top:12px;right:12px;font-size:11px;color:var(--muted);transition:color .2s;}
+.tut-card:hover::after{color:var(--pc,var(--accent));}
+.tut-type{font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:2px;display:inline-block;width:fit-content;}
+.tut-type.case{background:rgba(200,240,60,.08);color:var(--p1);border:1px solid rgba(200,240,60,.25);}
+.tut-type.tutorial{background:rgba(74,184,255,.08);color:var(--p3);border:1px solid rgba(74,184,255,.25);}
+.tut-type.paper{background:rgba(168,85,247,.08);color:var(--p4);border:1px solid rgba(168,85,247,.25);}
+.tut-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding-right:18px;line-height:1.3;}
+.tut-src{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+
+/* Upload/discuss row */
+.comm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.comm-btn{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:13px 16px;text-decoration:none;color:var(--text);transition:border-color .2s,background .2s;cursor:pointer;}
+.comm-btn:hover{border-color:var(--pc,var(--accent));background:var(--card);}
+.comm-icon{font-size:18px;flex-shrink:0;}
+.comm-btn-info{display:flex;flex-direction:column;gap:2px;}
+.comm-btn-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.comm-btn-sub{font-size:11px;color:var(--muted);}
+
+/* ─── NOTICE BOX ─── */
+.notice-box{background:rgba(200,240,60,.05);border:1px solid rgba(200,240,60,.2);border-radius:3px;padding:14px 18px;margin-top:12px;font-size:12px;color:var(--muted2);line-height:1.8;}
+.notice-box strong{color:var(--accent);}
+.notice-box a{color:var(--accent2);text-decoration:none;}
+.notice-box a:hover{text-decoration:underline;}
+
+/* ─── ENTERPRISE CASES ─── */
+.cases-intro{max-width:700px;font-size:13.5px;color:var(--muted2);line-height:1.9;margin-bottom:28px;}
+.cases-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.filter-btn{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;background:var(--card);border:1px solid var(--border);border-radius:2px;color:var(--muted);cursor:pointer;transition:all .2s;}
+.filter-btn:hover,.filter-btn.active{border-color:var(--p8);color:var(--p8);}
+.cases-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;}
+.case-card{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:22px;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;}
+.case-card:hover{transform:translateY(-3px);box-shadow:0 14px 44px rgba(0,0,0,.5);}
+.case-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cstart,var(--p8)),var(--cend,var(--p3)));}
+.case-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px;}
+.case-company{font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:2px;background:rgba(255,217,61,.07);border:1px solid rgba(255,217,61,.2);color:var(--p8);flex-shrink:0;}
+.case-region{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+.case-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px;line-height:1.3;}
+.case-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.case-desc{font-size:12px;color:var(--muted2);line-height:1.75;}
+.case-impact{display:flex;gap:16px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border2);}
+.impact-item{display:flex;flex-direction:column;gap:2px;}
+.impact-n{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--p8);}
+.impact-l{font-size:11px;color:var(--muted);}
+.case-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--border2);}
+.case-year{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+.case-src{font-family:'Space Mono',monospace;font-size:9px;color:var(--accent2);text-decoration:none;letter-spacing:.05em;}
+.case-src:hover{text-decoration:underline;}
+
+/* FOOTER */
+footer{position:relative;z-index:1;padding:56px 64px;border-top:1px solid var(--border);}
+.footer-inner{display:flex;justify-content:space-between;align-items:flex-end;}
+.footer-brand{font-family:'Syne',sans-serif;font-size:40px;font-weight:800;line-height:.9;}
+.footer-brand span{color:var(--accent);}
+.footer-meta{margin-top:14px;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);line-height:2.2;letter-spacing:.04em;}
+.footer-right{text-align:right;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);line-height:2;}
+.footer-right a{color:var(--muted2);text-decoration:none;}
+.footer-right a:hover{color:var(--accent);}
+
+/* DEPLOY GUIDE MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);z-index:1000;justify-content:center;align-items:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:36px;max-width:600px;width:90%;position:relative;max-height:92vh;overflow-y:auto;}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:2px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s;}
+.modal-close:hover{border-color:var(--accent);color:var(--accent);}
+.modal h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;}
+.modal-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:20px;}
+.deploy-step{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border2);}
+.deploy-step:last-child{border-bottom:none;}
+.step-num{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent);flex-shrink:0;width:32px;}
+.step-body{}
+.step-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:5px;}
+.step-desc{font-size:12.5px;color:var(--muted2);line-height:1.7;}
+.step-desc code{background:var(--card);padding:1px 6px;border-radius:2px;font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);}
+.step-desc a{color:var(--accent2);}
+.option-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+.option-card{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:14px;}
+.option-card h4{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--accent);}
+.option-card p{font-size:12px;color:var(--muted2);line-height:1.6;}
+.option-tag{display:inline-block;font-family:'Space Mono',monospace;font-size:8px;padding:2px 7px;border-radius:2px;margin-bottom:6px;background:rgba(200,240,60,.1);color:var(--p1);border:1px solid rgba(200,240,60,.25);}
+
+@media(max-width:768px){
+  .hero,.main,.search-bar{padding-left:24px;padding-right:24px;}
+  .nav-scroll{padding:0 24px;}
+  footer{padding:40px 24px;}
+  .footer-inner{flex-direction:column;gap:28px;align-items:flex-start;}
+  .inst-badge{left:24px;right:24px;flex-direction:column;gap:12px;}
+  .comm-actions{grid-template-columns:1fr;}
+  .option-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="cur" id="cur"></div>
+<div class="cur-r" id="curR"></div>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="inst-badge">
+    <div class="inst-left">
+      <div class="inst-name">西安交通大学 · Xi'an Jiaotong University</div>
+      <div class="inst-project">
+        本科教学改革研究项目 · 以产教融合为导向的生成式 AI 赋能工业设计课程改革<br>
+        <span style="font-size:11px;color:var(--muted)">Industrial Design Department · Undergraduate Teaching Reform Project</span>
+      </div>
+    </div>
+    <div class="inst-right">最后更新<br>2026.04.16<br><span style="color:var(--muted);font-size:9px">v3.0</span></div>
+  </div>
+  <div class="hero-tag">Open Source AI Toolkit · Industrial Design Education</div>
+  <h1>
+    <div class="h1-a">INDUSTRIAL</div>
+    <div class="h1-b">DESIGN</div>
+    <div class="h1-c">AI TOOLKIT</div>
+  </h1>
+  <p class="hero-sub">按完整工业设计思维流程组织的开源 AI 工具导航库。涵盖用户研究、概念创意、草图优化、3D建模、CMF 探索、工程仿真到成果展示全链路，同时收录国内外企业 AI 赋能工业设计的真实案例。</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-n">64+</span><span class="stat-l">AI 工具</span></div>
+    <div class="stat"><span class="stat-n">7</span><span class="stat-l">设计阶段</span></div>
+    <div class="stat"><span class="stat-n">16</span><span class="stat-l">企业案例</span></div>
+    <div class="stat"><span class="stat-n">开源</span><span class="stat-l">共建共享</span></div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-bar">
+  <div class="search-wrap">
+    <span class="s-icon">⌕</span>
+    <input type="text" id="searchInput" placeholder="搜索工具名称、功能关键词或企业案例…" autocomplete="off">
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="nav-scroll">
+    <button class="nav-btn active" onclick="scrollTo_('phase1')">01·用户研究</button>
+    <button class="nav-btn" onclick="scrollTo_('phase2')">02·概念创意</button>
+    <button class="nav-btn" onclick="scrollTo_('phase3')">03·草图优化</button>
+    <button class="nav-btn" onclick="scrollTo_('phase4')">04·3D建模</button>
+    <button class="nav-btn" onclick="scrollTo_('phase5')">05·CMF材料</button>
+    <button class="nav-btn" onclick="scrollTo_('phase6')">06·工程仿真</button>
+    <button class="nav-btn" onclick="scrollTo_('phase7')">07·展示交付</button>
+    <button class="nav-btn spec active" onclick="scrollTo_('enterprise')">★ 企业案例库</button>
+    <button class="nav-btn" onclick="openDeployGuide()" style="color:var(--p6);">📤 发布指南</button>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- ════ HELPER MACRO: each phase has tools-grid + community module ════
+     Community module has: 2-3 curated tutorial links + upload/discuss buttons -->
+
+<!-- ══════════════════════════════ PHASE 1 ══════════════════════════════ -->
+<section class="phase-sec" id="phase1">
+  <div class="phase-hdr">
+    <div class="ph-num">01</div>
+    <div class="ph-info">
+      <div class="ph-title"><span class="ph-dot" style="background:var(--p1)"></span>用户研究 · User Research</div>
+      <div class="ph-sub">访谈分析 · 行为洞察 · 数据综合 · 需求定义</div>
+    </div>
+    <div class="ph-cnt">12 工具</div>
+  </div>
+  <div class="tools-grid">
+    <a href="https://dovetail.com" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">Dovetail</div><div class="t-tags"><span class="tag hl">研究仓库</span><span class="tag">AI标注</span><span class="tag">主题聚类</span></div><div class="t-desc">AI 自动对访谈、调查和支持工单定性数据进行分类标注和主题聚类，从海量用户反馈中快速提炼关键洞见，支持团队共享。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://maze.co" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">Maze</div><div class="t-tags"><span class="tag hl">可用性测试</span><span class="tag">原型测试</span><span class="tag">热力图</span></div><div class="t-desc">AI 驱动的无调制用户测试，集成 Figma 原型，自动生成热力图、路径分析和智能追问，快速定位设计摩擦点。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://looppanel.com" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">Looppanel</div><div class="t-tags"><span class="tag hl">访谈分析</span><span class="tag">自动转录</span><span class="tag">智能摘要</span></div><div class="t-desc">专为用户访谈的 AI 分析工具，自动转录、打标签、跨访谈检索，访谈分析时间缩短 70%，SOC2 合规。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://otter.ai" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">Otter.ai</div><div class="t-tags"><span class="tag hl">实时转录</span><span class="tag">会议摘要</span><span class="tag">多人识别</span></div><div class="t-desc">实时语音转文字，适用于用户访谈和焦点小组，自动区分说话人并生成结构化摘要，免费额度足够课程使用。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/iOS/Android</span></div></a>
+    <a href="https://www.notion.so" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">Notion AI</div><div class="t-tags"><span class="tag hl">研究整理</span><span class="tag">知识管理</span><span class="tag">AI问答</span></div><div class="t-desc">将访谈笔记整合为知识库，借助 AI 检索洞见、生成报告框架和 HMW 问题陈述，适合团队协作整理调研资料。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/Desktop</span></div></a>
+    <a href="https://www.hotjar.com" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">Hotjar</div><div class="t-tags"><span class="tag hl">行为分析</span><span class="tag">热力图</span><span class="tag">会话录制</span></div><div class="t-desc">热力图和用户会话录制捕捉真实使用行为，AI 自动标记异常交互点，辅助发现可用性问题，学生计划免费。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.miro.com" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">Miro AI</div><div class="t-tags"><span class="tag hl">亲和图</span><span class="tag">KJ法</span><span class="tag">旅程地图</span></div><div class="t-desc">无限协作白板，AI 自动对便利贴进行主题聚类，快速绘制用户旅程地图和需求洞察地图，支持实时协作。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/Desktop</span></div></a>
+    <a href="https://notable.app" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">Notably</div><div class="t-tags"><span class="tag hl">研究仓库</span><span class="tag">AI标注</span><span class="tag">模式识别</span></div><div class="t-desc">自动转录访谈并 AI 生成智能标签，跨研究会话识别规律，将分散的定性数据整合为可分享的洞见报告。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.sprig.com" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">Sprig</div><div class="t-tags"><span class="tag hl">微调研</span><span class="tag">实时反馈</span><span class="tag">AI分析</span></div><div class="t-desc">在产品体验中嵌入微调研，AI 实时分析开放式回答，自动聚合高频用户痛点，快速验证设计假设。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.userology.co" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">Userology</div><div class="t-tags"><span class="tag hl">AI主持人</span><span class="tag">原型测试</span><span class="tag">概念验证</span></div><div class="t-desc">AI 自动主持用户测试，全程引导受访者并追问，自动生成带时间戳的可用性分析报告。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.userinterviews.com" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">User Interviews</div><div class="t-tags"><span class="tag hl">受访者招募</span><span class="tag">访谈调度</span></div><div class="t-desc">快速招募目标用户受访者，AI 辅助筛选匹配度、自动调度访谈时间，支持研究全流程管理。</div><div class="t-meta"><span class="t-price paid">Paid</span><span class="t-plat">Web</span></div></a>
+    <a href="https://chatgpt.com" target="_blank" class="tool-card" style="--pc:var(--p1)"><div class="t-name">ChatGPT / Claude</div><div class="t-tags"><span class="tag hl">定性分析</span><span class="tag">需求提炼</span><span class="tag">报告生成</span></div><div class="t-desc">粘贴访谈文本，AI 进行情感分析、主题归纳、用户痛点提炼，快速生成 HMW 问题陈述与设计简报。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/Mobile</span></div></a>
+  </div>
+  <!-- Community Module -->
+  <div class="comm-module" style="--pc:var(--p1)">
+    <div class="comm-top"><span class="comm-dot"></span><span class="comm-title-t">用户研究阶段 · 参考案例与教程</span></div>
+    <div class="comm-sub">精选学习资源 · 上传你的案例 · 参与讨论</div>
+    <div class="tut-grid">
+      <a href="https://maze.co/blog/ai-tools-user-research/" target="_blank" class="tut-card" style="--pc:var(--p1)">
+        <span class="tut-type tutorial">教程</span>
+        <div class="tut-title">Maze 用户研究工具全景：AI 辅助研究最佳实践</div>
+        <div class="tut-src">maze.co · 英文 · 2024</div>
+      </a>
+      <a href="https://www.looppanel.com/blog/ai-for-ux-research-methods" target="_blank" class="tut-card" style="--pc:var(--p1)">
+        <span class="tut-type tutorial">教程</span>
+        <div class="tut-title">如何将 AI 用于 UX 研究方法：Looppanel 完整指南</div>
+        <div class="tut-src">looppanel.com · 英文 · 2024</div>
+      </a>
+      <a href="https://dovetail.com/ux/ai-tools-for-ux-research/" target="_blank" class="tut-card" style="--pc:var(--p1)">
+        <span class="tut-type case">案例</span>
+        <div class="tut-title">25 个 AI 用户研究工具综合评测与使用场景</div>
+        <div class="tut-src">dovetail.com · 英文 · 2025</div>
+      </a>
+    </div>
+    <div class="comm-actions">
+      <a href="YOUR_AIRTABLE_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">📁</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">上传案例 / 教程</div><div class="comm-btn-sub">分享你在用户研究中使用 AI 工具的项目案例</div></div>
+      </a>
+      <a href="YOUR_DISCUSSION_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">💬</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">参与讨论</div><div class="comm-btn-sub">提问、交流心得、分享踩坑经验</div></div>
+      </a>
+    </div>
+    <div class="notice-box">💡 <strong>如何真实提交？</strong> 点击"上传案例"将跳转至在线表单（Airtable），你的提交将由老师审核后展示在此页面。文件支持 PDF、图片、视频链接。详见 <a href="#" onclick="openDeployGuide();return false;">发布指南</a>。</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ PHASE 2 ══════════════════════════════ -->
+<section class="phase-sec" id="phase2">
+  <div class="phase-hdr">
+    <div class="ph-num">02</div>
+    <div class="ph-info">
+      <div class="ph-title"><span class="ph-dot" style="background:var(--p2)"></span>概念创意 · Concept Ideation</div>
+      <div class="ph-sub">头脑风暴 · 灵感探索 · 趋势分析 · 概念发散</div>
+    </div>
+    <div class="ph-cnt">10 工具</div>
+  </div>
+  <div class="tools-grid">
+    <a href="https://www.midjourney.com" target="_blank" class="tool-card" style="--pc:var(--p2)"><div class="t-name">Midjourney</div><div class="t-tags"><span class="tag hl">图像生成</span><span class="tag">灵感探索</span><span class="tag">情绪板</span></div><div class="t-desc">通过文本提示生成产品概念意向图和设计风格参考，支持图像风格混合，是概念阶段最强力的灵感引擎之一。</div><div class="t-meta"><span class="t-price paid">Paid</span><span class="t-plat">Web/Discord</span></div></a>
+    <a href="https://openai.com/dall-e-3" target="_blank" class="tool-card" style="--pc:var(--p2)"><div class="t-name">DALL·E 3</div><div class="t-tags"><span class="tag hl">概念图像</span><span class="tag">文生图</span><span class="tag">精准描述</span></div><div class="t-desc">OpenAI 图像生成，擅长理解复杂设计描述并输出精准概念图，可结合 ChatGPT 进行多轮提示词迭代优化。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/API</span></div></a>
+    <a href="https://stability.ai" target="_blank" class="tool-card" style="--pc:var(--p2)"><div class="t-name">Stable Diffusion</div><div class="t-tags"><span class="tag hl">开源生成</span><span class="tag">本地部署</span><span class="tag">ControlNet</span></div><div class="t-desc">开源图像生成，可本地运行无费用，通过 ControlNet 插件实现草图控图，沿设计线稿精准生成渲染效果图。</div><div class="t-meta"><span class="t-price free">Free/开源</span><span class="t-plat">Local/Web</span></div></a>
+    <a href="https://krea.ai" target="_blank" class="tool-card" style="--pc:var(--p2)"><div class="t-name">KREA AI</div><div class="t-tags"><span class="tag hl">实时生成</span><span class="tag">草图渲染</span><span class="tag">参考引导</span></div><div class="t-desc">实时 AI 图像生成画板，绘制过程中同步看到 AI 解读效果，极大提升概念探索效率，支持参考图引导。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.adobe.com/products/firefly.html" target="_blank" class="tool-card" style="--pc:var(--p2)"><div class="t-name">Adobe Firefly</div><div class="t-tags"><span class="tag hl">商业安全</span><span class="tag">创意填充</span><span class="tag">CC集成</span></div><div class="t-desc">基于授权素材训练，商业使用安全，与 Photoshop/Illustrator 深度集成，支持生成式填充。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/CC</span></div></a>
+    <a href="https://ideogram.ai" target="_blank" class="tool-card" style="--pc:var(--p2)"><div class="t-name">Ideogram AI</div><div class="t-tags"><span class="tag hl">文字排版</span><span class="tag">品牌概念</span><span class="tag">海报设计</span></div><div class="t-desc">在图像中精准渲染文字，适合含产品名称和标语的概念看板，也适用于品牌视觉概念快速探索。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.perplexity.ai" target="_blank" class="tool-card" style="--pc:var(--p2)"><div class="t-name">Perplexity AI</div><div class="t-tags"><span class="tag hl">趋势研究</span><span class="tag">竞品分析</span><span class="tag">实时搜索</span></div><div class="t-desc">带引用来源的 AI 搜索，快速调研设计趋势和竞品定位，为概念立意提供市场依据。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/Mobile</span></div></a>
+    <a href="https://leonardo.ai" target="_blank" class="tool-card" style="--pc:var(--p2)"><div class="t-name">Leonardo AI</div><div class="t-tags"><span class="tag hl">产品渲染</span><span class="tag">风格一致性</span><span class="tag">批量生成</span></div><div class="t-desc">支持微调风格模型确保系列概念图视觉一致，适合产品系列的概念视觉开发，内置工业设计风格预设。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.figma.com/figjam/" target="_blank" class="tool-card" style="--pc:var(--p2)"><div class="t-name">FigJam AI</div><div class="t-tags"><span class="tag hl">协作创意</span><span class="tag">思维导图</span><span class="tag">AI框架</span></div><div class="t-desc">协作白板中 AI 自动生成设计思维框架、用户旅程地图和 HMW 问题树，帮助团队快速组织发散性思维。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/Desktop</span></div></a>
+    <a href="https://claude.ai" target="_blank" class="tool-card" style="--pc:var(--p2)"><div class="t-name">Claude (创意思维)</div><div class="t-tags"><span class="tag hl">SCAMPER</span><span class="tag">形态分析</span><span class="tag">概念发散</span></div><div class="t-desc">利用 SCAMPER、逆向思维、跨界联想等创意方法论，引导 AI 系统化发散和评估设计概念方向。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/Mobile</span></div></a>
+  </div>
+  <div class="comm-module" style="--pc:var(--p2)">
+    <div class="comm-top"><span class="comm-dot"></span><span class="comm-title-t">概念创意阶段 · 参考案例与教程</span></div>
+    <div class="comm-sub">精选学习资源 · 分享你的 AI 概念图 · 交流 Prompt 技巧</div>
+    <div class="tut-grid">
+      <a href="https://solomon.io/generative-ai-industrial-design/" target="_blank" class="tut-card" style="--pc:var(--p2)">
+        <span class="tut-type tutorial">教程</span>
+        <div class="tut-title">ChatGPT + Midjourney 工业设计创意生成完整工作流</div>
+        <div class="tut-src">solomon.io · 英文 · 2024</div>
+      </a>
+      <a href="https://www.mdpi.com/2073-8994/18/2/352" target="_blank" class="tut-card" style="--pc:var(--p2)">
+        <span class="tut-type paper">学术</span>
+        <div class="tut-title">生成式 AI 驱动的工业设计框架：人机协同概念生成（MDPI）</div>
+        <div class="tut-src">mdpi.com · 英文 · 2026</div>
+      </a>
+      <a href="https://dl.acm.org/doi/full/10.1145/3708394.3708413" target="_blank" class="tut-card" style="--pc:var(--p2)">
+        <span class="tut-type paper">学术</span>
+        <div class="tut-title">AI 前后的工业设计：ChatGPT/DALL-E/Midjourney/Vizcom 在本科教育中的应用</div>
+        <div class="tut-src">ACM · 英文 · 2024</div>
+      </a>
+    </div>
+    <div class="comm-actions">
+      <a href="YOUR_AIRTABLE_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">🎨</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">上传案例 / 教程</div><div class="comm-btn-sub">分享 AI 生成的概念效果图及 Prompt 模板</div></div>
+      </a>
+      <a href="YOUR_DISCUSSION_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">💬</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">参与讨论</div><div class="comm-btn-sub">交流各工具优劣对比和使用技巧</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ PHASE 3 ══════════════════════════════ -->
+<section class="phase-sec" id="phase3">
+  <div class="phase-hdr">
+    <div class="ph-num">03</div>
+    <div class="ph-info">
+      <div class="ph-title"><span class="ph-dot" style="background:var(--p3)"></span>草图优化 · Sketch Enhancement</div>
+      <div class="ph-sub">草图转渲染 · 线稿优化 · 视觉精细化 · 产品可视化</div>
+    </div>
+    <div class="ph-cnt">9 工具</div>
+  </div>
+  <div class="tools-grid">
+    <a href="https://vizcom.com" target="_blank" class="tool-card" style="--pc:var(--p3)"><div class="t-name">Vizcom</div><div class="t-tags"><span class="tag hl">草图转渲染</span><span class="tag">3D生成</span><span class="tag">CMF控制</span></div><div class="t-desc">工业设计师首选 AI 可视化工具，手绘草图秒变高保真产品渲染图，支持材质参考上传和实时迭代。Ford、New Balance 采用。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://rendair.ai" target="_blank" class="tool-card" style="--pc:var(--p3)"><div class="t-name">Rendair AI</div><div class="t-tags"><span class="tag hl">产品渲染</span><span class="tag">草图转图</span><span class="tag">风格调控</span></div><div class="t-desc">专为产品设计师的 AI 渲染工具，从草图直接生成照片级产品效果图，支持多风格切换和产品比例保持。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://stability.ai" target="_blank" class="tool-card" style="--pc:var(--p3)"><div class="t-name">ComfyUI + ControlNet</div><div class="t-tags"><span class="tag hl">线稿控图</span><span class="tag">开源工作流</span><span class="tag">精准控制</span></div><div class="t-desc">基于 Stable Diffusion 的高度自定义工作流，通过 ControlNet 线稿控图，构建草图→渲染自动化管线。</div><div class="t-meta"><span class="t-price free">Free/开源</span><span class="t-plat">Local</span></div></a>
+    <a href="https://www.adobe.com/products/photoshop.html" target="_blank" class="tool-card" style="--pc:var(--p3)"><div class="t-name">Photoshop + Firefly</div><div class="t-tags"><span class="tag hl">生成填充</span><span class="tag">背景扩展</span><span class="tag">材质替换</span></div><div class="t-desc">在专业修图环境中使用 AI 生成填充，快速扩展产品效果图背景、替换材质、优化光影，适合产品展示图精修。</div><div class="t-meta"><span class="t-price paid">Paid(CC)</span><span class="t-plat">Desktop</span></div></a>
+    <a href="https://www.keyshot.com" target="_blank" class="tool-card" style="--pc:var(--p3)"><div class="t-name">KeyShot</div><div class="t-tags"><span class="tag hl">产品渲染</span><span class="tag">实时预览</span><span class="tag">动画演示</span></div><div class="t-desc">工业界标准产品渲染软件，AI 辅助场景搭建和材质推荐，从 CAD 模型快速生成照片级展示渲染。</div><div class="t-meta"><span class="t-price paid">Paid</span><span class="t-plat">Desktop</span></div></a>
+    <a href="https://uizard.io" target="_blank" class="tool-card" style="--pc:var(--p3)"><div class="t-name">Uizard</div><div class="t-tags"><span class="tag hl">草图转界面</span><span class="tag">智能产品UI</span></div><div class="t-desc">上传手绘界面草图，AI 自动转换为可交互数字原型，适合包含屏幕界面的智能产品设计。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://krea.ai" target="_blank" class="tool-card" style="--pc:var(--p3)"><div class="t-name">KREA (草图模式)</div><div class="t-tags"><span class="tag hl">实时渲染</span><span class="tag">边画边看</span></div><div class="t-desc">在画布绘制草图的同时实时看到 AI 渲染结果，快速迭代形态方向，是草图探索阶段的高效工具。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.canva.com" target="_blank" class="tool-card" style="--pc:var(--p3)"><div class="t-name">Canva Magic Studio</div><div class="t-tags"><span class="tag hl">情绪板</span><span class="tag">展示看板</span></div><div class="t-desc">AI 辅助快速制作概念情绪板和展示看板，Magic Write 生成文案描述，适合阶段性汇报材料制作。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/Desktop</span></div></a>
+    <a href="https://www.sketchup.com" target="_blank" class="tool-card" style="--pc:var(--p3)"><div class="t-name">SketchUp AI</div><div class="t-tags"><span class="tag hl">快速建模</span><span class="tag">实时渲染</span></div><div class="t-desc">直觉式 3D 草图建模，配合 AI 插件从描述生成基础几何体，适合从概念草图快速过渡到三维空间感知。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/Desktop</span></div></a>
+  </div>
+  <div class="comm-module" style="--pc:var(--p3)">
+    <div class="comm-top"><span class="comm-dot"></span><span class="comm-title-t">草图优化阶段 · 参考案例与教程</span></div>
+    <div class="comm-sub">精选学习资源 · 分享草图渲染案例</div>
+    <div class="tut-grid">
+      <a href="https://vizcom.com/blog/ai-for-product-designers" target="_blank" class="tut-card" style="--pc:var(--p3)">
+        <span class="tut-type tutorial">教程</span>
+        <div class="tut-title">Vizcom 官方：AI 产品设计师工作流实战案例（含运动鞋、家居、汽车）</div>
+        <div class="tut-src">vizcom.com · 英文 · 2026</div>
+      </a>
+      <a href="https://www.studiored.com/blog/design/how-ai-is-transforming-the-industrial-design-workflow/" target="_blank" class="tut-card" style="--pc:var(--p3)">
+        <span class="tut-type case">案例</span>
+        <div class="tut-title">设计公司 StudioRed：Vizcom + Midjourney + Photoshop AI 完整工作流实验</div>
+        <div class="tut-src">studiored.com · 英文 · 2025</div>
+      </a>
+      <a href="https://www.idsa.org/wp-content/uploads/2024/10/Exploring-Generative-Image-AI-for-Design-Evaluation.pdf" target="_blank" class="tut-card" style="--pc:var(--p3)">
+        <span class="tut-type paper">学术</span>
+        <div class="tut-title">IDSA 2024 教育论文：用 Vizcom 快速生成 20+ 机器人概念方案评估人类相似性</div>
+        <div class="tut-src">idsa.org · 英文 · 2024</div>
+      </a>
+    </div>
+    <div class="comm-actions">
+      <a href="YOUR_AIRTABLE_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">✏️</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">上传案例 / 教程</div><div class="comm-btn-sub">分享草图原稿与 AI 渲染对比图，附参数说明</div></div>
+      </a>
+      <a href="YOUR_DISCUSSION_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">💬</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">参与讨论</div><div class="comm-btn-sub">讨论不同工具在工业设计草图渲染上的表现差异</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ PHASE 4 ══════════════════════════════ -->
+<section class="phase-sec" id="phase4">
+  <div class="phase-hdr">
+    <div class="ph-num">04</div>
+    <div class="ph-info">
+      <div class="ph-title"><span class="ph-dot" style="background:var(--p4)"></span>3D建模与参数化 · 3D Modeling & Parametric</div>
+      <div class="ph-sub">CAD建模 · 参数化设计 · 生成式设计 · 形态优化</div>
+    </div>
+    <div class="ph-cnt">10 工具</div>
+  </div>
+  <div class="tools-grid">
+    <a href="https://www.autodesk.com/products/fusion-360" target="_blank" class="tool-card" style="--pc:var(--p4)"><div class="t-name">Autodesk Fusion 360</div><div class="t-tags"><span class="tag hl">生成式设计</span><span class="tag">拓扑优化</span><span class="tag">学生免费</span></div><div class="t-desc">业界领先云端 CAD/CAM，内置 AI 生成式设计模块，根据载荷约束自动探索多种最优结构形式。学生免费授权。</div><div class="t-meta"><span class="t-price free">学生免费</span><span class="t-plat">Desktop/Cloud</span></div></a>
+    <a href="https://www.rhino3d.com" target="_blank" class="tool-card" style="--pc:var(--p4)"><div class="t-name">Rhino 3D + Grasshopper</div><div class="t-tags"><span class="tag hl">曲面建模</span><span class="tag">NURBS</span><span class="tag">参数化</span></div><div class="t-desc">工业设计曲面建模标准工具，搭配 Grasshopper 实现参数化和生成式设计，是产品形态开发的核心平台。</div><div class="t-meta"><span class="t-price paid">Paid(学生优惠)</span><span class="t-plat">Desktop</span></div></a>
+    <a href="https://www.raven.build" target="_blank" class="tool-card" style="--pc:var(--p4)"><div class="t-name">Raven (Grasshopper AI)</div><div class="t-tags"><span class="tag hl">自然语言建模</span><span class="tag">AI参数化</span></div><div class="t-desc">Grasshopper 的 AI 插件，通过自然语言描述自动生成参数化脚本，无需编程基础即可构建复杂几何逻辑，10倍提速。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Rhino Plugin</span></div></a>
+    <a href="https://www.ntopology.com" target="_blank" class="tool-card" style="--pc:var(--p4)"><div class="t-name">nTopology</div><div class="t-tags"><span class="tag hl">晶格结构</span><span class="tag">拓扑优化</span><span class="tag">增材制造</span></div><div class="t-desc">先进计算设计引擎，AI 进行晶格结构生成和多目标拓扑优化，适合轻量化结构设计和 3D 打印制造。</div><div class="t-meta"><span class="t-price paid">Paid</span><span class="t-plat">Desktop</span></div></a>
+    <a href="https://www.tripo3d.ai" target="_blank" class="tool-card" style="--pc:var(--p4)"><div class="t-name">Tripo AI</div><div class="t-tags"><span class="tag hl">文本转3D</span><span class="tag">图像转3D</span></div><div class="t-desc">从文字描述或参考图像直接生成 3D 模型，支持 PBR 材质和智能拓扑，适合概念形态的快速三维化探索。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/API</span></div></a>
+    <a href="https://www.dassault-systemes.com/en/solidworks.html" target="_blank" class="tool-card" style="--pc:var(--p4)"><div class="t-name">SolidWorks</div><div class="t-tags"><span class="tag hl">工程建模</span><span class="tag">装配体</span></div><div class="t-desc">工程级参数化 CAD 标准，AI 辅助特征识别和设计建议，从工业设计向产品工程过渡的核心工具。</div><div class="t-meta"><span class="t-price paid">Paid(学生授权)</span><span class="t-plat">Desktop</span></div></a>
+    <a href="https://www.blender.org" target="_blank" class="tool-card" style="--pc:var(--p4)"><div class="t-name">Blender + BlenderGPT</div><div class="t-tags"><span class="tag hl">开源3D</span><span class="tag">自然语言驱动</span></div><div class="t-desc">免费开源专业 3D 工具，配合 BlenderGPT 插件通过自然语言驱动建模操作，适合概念产品展示动画。</div><div class="t-meta"><span class="t-price free">Free/开源</span><span class="t-plat">Desktop</span></div></a>
+    <a href="https://spline.design" target="_blank" class="tool-card" style="--pc:var(--p4)"><div class="t-name">Spline AI</div><div class="t-tags"><span class="tag hl">3D网页</span><span class="tag">交互3D</span></div><div class="t-desc">浏览器端 3D 设计工具，AI 文本生成 3D 场景，适合制作可交互的产品展示原型和数字孪生演示页面。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.meshy.ai" target="_blank" class="tool-card" style="--pc:var(--p4)"><div class="t-name">Meshy AI</div><div class="t-tags"><span class="tag hl">图像转3D</span><span class="tag">纹理生成</span></div><div class="t-desc">上传产品概念图即可生成带纹理的 3D 模型，快速为效果图生成可旋转查看的三维版本。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.ptc.com/en/products/creo" target="_blank" class="tool-card" style="--pc:var(--p4)"><div class="t-name">PTC Creo</div><div class="t-tags"><span class="tag hl">生成式设计</span><span class="tag">制造约束</span></div><div class="t-desc">企业级 CAD，Generative Topology Optimization 模块在满足制造约束下自动生成结构形式。</div><div class="t-meta"><span class="t-price paid">Paid</span><span class="t-plat">Desktop</span></div></a>
+  </div>
+  <div class="comm-module" style="--pc:var(--p4)">
+    <div class="comm-top"><span class="comm-dot"></span><span class="comm-title-t">3D建模与参数化阶段 · 参考案例与教程</span></div>
+    <div class="comm-sub">精选学习资源 · 分享参数化模型与生成式设计方案</div>
+    <div class="tut-grid">
+      <a href="https://all3dp.com/2/fusion-360-generative-design-tutorial/" target="_blank" class="tut-card" style="--pc:var(--p4)">
+        <span class="tut-type tutorial">教程</span>
+        <div class="tut-title">Fusion 360 生成式设计实操教程：从约束设定到制造导出</div>
+        <div class="tut-src">all3dp.com · 英文 · 2023</div>
+      </a>
+      <a href="https://www.autodesk.com/autodesk-university/article/Fusion-360-Introduction-to-Generative-Design" target="_blank" class="tut-card" style="--pc:var(--p4)">
+        <span class="tut-type tutorial">教程</span>
+        <div class="tut-title">Autodesk University：Fusion 360 生成式设计入门（官方课程）</div>
+        <div class="tut-src">autodesk.com · 英文 · 官方</div>
+      </a>
+      <a href="https://www.autodesk.com/autodesk-university/class/Educational-Experience-Generative-Design-Case-Study-2019" target="_blank" class="tut-card" style="--pc:var(--p4)">
+        <span class="tut-type case">案例</span>
+        <div class="tut-title">教育场景下的生成式设计案例：从概念到制造的工程教学实践</div>
+        <div class="tut-src">Autodesk University · 英文</div>
+      </a>
+    </div>
+    <div class="comm-actions">
+      <a href="YOUR_AIRTABLE_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">🧊</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">上传案例 / 教程</div><div class="comm-btn-sub">分享参数化模型文件、Grasshopper 脚本或生成式设计方案</div></div>
+      </a>
+      <a href="YOUR_DISCUSSION_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">💬</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">参与讨论</div><div class="comm-btn-sub">讨论 Raven AI、Fusion 360 生成式设计的应用技巧</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ PHASE 5 ══════════════════════════════ -->
+<section class="phase-sec" id="phase5">
+  <div class="phase-hdr">
+    <div class="ph-num">05</div>
+    <div class="ph-info">
+      <div class="ph-title"><span class="ph-dot" style="background:var(--p5)"></span>CMF 与材料探索 · Color, Material & Finish</div>
+      <div class="ph-sub">色彩系统 · 材料模拟 · 表面处理 · 感性工学</div>
+    </div>
+    <div class="ph-cnt">8 工具</div>
+  </div>
+  <div class="tools-grid">
+    <a href="https://vizcom.com" target="_blank" class="tool-card" style="--pc:var(--p5)"><div class="t-name">Vizcom (CMF模式)</div><div class="t-tags"><span class="tag hl">CMF探索</span><span class="tag">材质参考</span></div><div class="t-desc">上传材质参考图引导 AI 渲染，在同一产品形态上快速比较皮革、磨砂金属、编织尼龙等不同 CMF 方向。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.adobe.com/products/substance3d.html" target="_blank" class="tool-card" style="--pc:var(--p5)"><div class="t-name">Adobe Substance 3D</div><div class="t-tags"><span class="tag hl">材质生成</span><span class="tag">PBR材质</span></div><div class="t-desc">AI 辅助 3D 材质生成套件，创建照片级真实材质贴图，将表面质感的想法直接转化为可用于渲染的材质文件。</div><div class="t-meta"><span class="t-price paid">Paid(CC)</span><span class="t-plat">Desktop</span></div></a>
+    <a href="https://www.colormind.io" target="_blank" class="tool-card" style="--pc:var(--p5)"><div class="t-name">Colormind</div><div class="t-tags"><span class="tag hl">配色生成</span><span class="tag">趋势色彩</span></div><div class="t-desc">基于深度学习的配色方案生成，从图片或文字描述提取产品色彩方向，辅助建立系统化的产品色彩语言。</div><div class="t-meta"><span class="t-price free">Free</span><span class="t-plat">Web</span></div></a>
+    <a href="https://coolors.co" target="_blank" class="tool-card" style="--pc:var(--p5)"><div class="t-name">Coolors AI</div><div class="t-tags"><span class="tag hl">色板生成</span><span class="tag">PANTONE对应</span></div><div class="t-desc">AI 驱动色彩工具，从产品图像一键提取和谐色板，支持 PANTONE 对应和色彩搭配分析。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.autodesk.com/products/alias" target="_blank" class="tool-card" style="--pc:var(--p5)"><div class="t-name">Autodesk Alias</div><div class="t-tags"><span class="tag hl">Class-A曲面</span><span class="tag">CMF评审</span></div><div class="t-desc">汽车和消费品 A 级曲面建模标准工具，支持专业 CMF 评审模式，精确模拟不同光线下的材质和色彩表现。</div><div class="t-meta"><span class="t-price paid">Paid</span><span class="t-plat">Desktop</span></div></a>
+    <a href="https://www.materialdistrict.com" target="_blank" class="tool-card" style="--pc:var(--p5)"><div class="t-name">MateriO</div><div class="t-tags"><span class="tag hl">材料数据库</span><span class="tag">可持续材料</span></div><div class="t-desc">专业材料数据库，涵盖创新材料和可持续材料，AI 辅助搜索帮助设计师根据触感、外观需求快速找到合适材料。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://palette.fm" target="_blank" class="tool-card" style="--pc:var(--p5)"><div class="t-name">Palette.fm</div><div class="t-tags"><span class="tag hl">图像调色</span><span class="tag">快速上色</span></div><div class="t-desc">AI 自动为黑白线稿或渲染图上色，支持多种配色风格预设，快速探索同一形态下不同色彩处理的视觉效果。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.midjourney.com" target="_blank" class="tool-card" style="--pc:var(--p5)"><div class="t-name">Midjourney (CMF情绪板)</div><div class="t-tags"><span class="tag hl">质感渲染</span><span class="tag">表面纹理</span></div><div class="t-desc">通过精细材质描述词（如 "brushed titanium"、"matte ceramic glaze"）生成 CMF 情绪板，辅助材质语言视觉化。</div><div class="t-meta"><span class="t-price paid">Paid</span><span class="t-plat">Web/Discord</span></div></a>
+  </div>
+  <div class="comm-module" style="--pc:var(--p5)">
+    <div class="comm-top"><span class="comm-dot"></span><span class="comm-title-t">CMF 与材料阶段 · 参考案例与教程</span></div>
+    <div class="comm-sub">精选学习资源 · 分享 CMF 探索过程</div>
+    <div class="tut-grid">
+      <a href="https://vizcom.com/blog/ai-design-workflow-integration-guide" target="_blank" class="tut-card" style="--pc:var(--p5)">
+        <span class="tut-type tutorial">教程</span>
+        <div class="tut-title">Vizcom：AI 设计工作流集成指南——CMF 探索在哪个阶段最有效</div>
+        <div class="tut-src">vizcom.com · 英文 · 2026</div>
+      </a>
+      <a href="https://declom.com/vizcom" target="_blank" class="tut-card" style="--pc:var(--p5)">
+        <span class="tut-type case">案例</span>
+        <div class="tut-title">Vizcom 深度评测：CMF 材质参考引导功能在运动鞋设计中的实战</div>
+        <div class="tut-src">declom.com · 英文 · 2026</div>
+      </a>
+      <a href="https://www.mistywest.com/posts/reduce-time-to-market-with-ai-for-industrial-design/" target="_blank" class="tut-card" style="--pc:var(--p5)">
+        <span class="tut-type case">案例</span>
+        <div class="tut-title">MistyWest：使用 Vizcom AI 将 LIDAR 设备设计从草图到照片渲染的时间缩短 50%</div>
+        <div class="tut-src">mistywest.com · 英文 · 2024</div>
+      </a>
+    </div>
+    <div class="comm-actions">
+      <a href="YOUR_AIRTABLE_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">🎨</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">上传案例 / 教程</div><div class="comm-btn-sub">分享 CMF 探索过程图、Prompt 材质描述词和配色系统</div></div>
+      </a>
+      <a href="YOUR_DISCUSSION_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">💬</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">参与讨论</div><div class="comm-btn-sub">讨论 AI 在材质模拟和色彩系统构建中的应用</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ PHASE 6 ══════════════════════════════ -->
+<section class="phase-sec" id="phase6">
+  <div class="phase-hdr">
+    <div class="ph-num">06</div>
+    <div class="ph-info">
+      <div class="ph-title"><span class="ph-dot" style="background:var(--p6)"></span>工程仿真与验证 · Engineering Simulation</div>
+      <div class="ph-sub">结构分析 · 流体仿真 · 制造可行性 · 数字孪生</div>
+    </div>
+    <div class="ph-cnt">7 工具</div>
+  </div>
+  <div class="tools-grid">
+    <a href="https://www.ansys.com" target="_blank" class="tool-card" style="--pc:var(--p6)"><div class="t-name">ANSYS AI</div><div class="t-tags"><span class="tag hl">结构仿真</span><span class="tag">流体力学</span></div><div class="t-desc">行业领先仿真平台，AI 辅助网格生成、边界条件设置和结果解读，将有限元分析融入早期设计决策。</div><div class="t-meta"><span class="t-price paid">Paid(学生授权)</span><span class="t-plat">Desktop/Cloud</span></div></a>
+    <a href="https://www.autodesk.com/products/fusion-360/simulation" target="_blank" class="tool-card" style="--pc:var(--p6)"><div class="t-name">Fusion 360 Simulation</div><div class="t-tags"><span class="tag hl">快速仿真</span><span class="tag">AI网格</span></div><div class="t-desc">集成于 Fusion 360 的 AI 辅助仿真模块，自动识别关键区域进行网格细化，快速验证产品结构性能。</div><div class="t-meta"><span class="t-price free">学生免费</span><span class="t-plat">Cloud/Desktop</span></div></a>
+    <a href="https://www.altair.com/inspire/" target="_blank" class="tool-card" style="--pc:var(--p6)"><div class="t-name">Altair Inspire</div><div class="t-tags"><span class="tag hl">拓扑优化</span><span class="tag">概念仿真</span></div><div class="t-desc">面向设计师的概念仿真工具，AI 自动建议最优结构形式，支持多种制造工艺约束，无需深厚仿真背景。</div><div class="t-meta"><span class="t-price paid">Paid(学生授权)</span><span class="t-plat">Desktop</span></div></a>
+    <a href="https://www.simscale.com" target="_blank" class="tool-card" style="--pc:var(--p6)"><div class="t-name">SimScale</div><div class="t-tags"><span class="tag hl">云端仿真</span><span class="tag">无本地算力</span></div><div class="t-desc">基于云端的 CAE 平台，浏览器中完成结构、流体、热力学仿真，AI 辅助设置向导，学生免费账户。</div><div class="t-meta"><span class="t-price free">学生免费</span><span class="t-plat">Web/Cloud</span></div></a>
+    <a href="https://www.siemens.com/global/en/products/software/nx.html" target="_blank" class="tool-card" style="--pc:var(--p6)"><div class="t-name">Siemens NX</div><div class="t-tags"><span class="tag hl">数字孪生</span><span class="tag">制造仿真</span></div><div class="t-desc">企业级 PLM 平台，集成 AI 驱动制造工艺仿真，支持从设计到制造的完整数字孪生体系。</div><div class="t-meta"><span class="t-price paid">Paid</span><span class="t-plat">Desktop</span></div></a>
+    <a href="https://openfoam.org" target="_blank" class="tool-card" style="--pc:var(--p6)"><div class="t-name">OpenFOAM + AI</div><div class="t-tags"><span class="tag hl">开源CFD</span><span class="tag">流体仿真</span></div><div class="t-desc">开源计算流体力学工具，配合 AI 前后处理插件分析产品空气动力学和散热性能，完全免费。</div><div class="t-meta"><span class="t-price free">Free/开源</span><span class="t-plat">Local/HPC</span></div></a>
+    <a href="https://www.materialise.com" target="_blank" class="tool-card" style="--pc:var(--p6)"><div class="t-name">Materialise Magics</div><div class="t-tags"><span class="tag hl">3D打印准备</span><span class="tag">制造可行性</span></div><div class="t-desc">3D 打印数据准备与工艺优化，AI 自动检测壁厚、悬垂角等可打印性问题，辅助快速原型制作的工艺验证。</div><div class="t-meta"><span class="t-price paid">Paid</span><span class="t-plat">Desktop</span></div></a>
+  </div>
+  <div class="comm-module" style="--pc:var(--p6)">
+    <div class="comm-top"><span class="comm-dot"></span><span class="comm-title-t">工程仿真阶段 · 参考案例与教程</span></div>
+    <div class="comm-sub">精选学习资源 · 分享仿真分析案例</div>
+    <div class="tut-grid">
+      <a href="https://www.autodesk.com/products/fusion-360/blog/topology-optimization-and-autodesk-fusion/" target="_blank" class="tut-card" style="--pc:var(--p6)">
+        <span class="tut-type tutorial">教程</span>
+        <div class="tut-title">Autodesk 官方：Fusion 360 拓扑优化与 AI 驱动工作流详解</div>
+        <div class="tut-src">autodesk.com · 英文 · 2025</div>
+      </a>
+      <a href="https://adsknews.autodesk.com/en/news/autodesk-airbus-generative-design-aerospace-factory/" target="_blank" class="tut-card" style="--pc:var(--p6)">
+        <span class="tut-type case">案例</span>
+        <div class="tut-title">Autodesk × Airbus：生成式设计如何推进航空制造——从概念到工厂落地</div>
+        <div class="tut-src">autodesk.com · 英文 · 2023</div>
+      </a>
+      <a href="https://www.hannovermesse.de/en/news/news-articles/airbus-builds-ai-optimized-partition-wall" target="_blank" class="tut-card" style="--pc:var(--p6)">
+        <span class="tut-type case">案例</span>
+        <div class="tut-title">汉诺威工业展：Airbus AI 优化隔板——全流程记录与可制造性分析</div>
+        <div class="tut-src">hannovermesse.de · 英文 · 2019</div>
+      </a>
+    </div>
+    <div class="comm-actions">
+      <a href="YOUR_AIRTABLE_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">⚙️</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">上传案例 / 教程</div><div class="comm-btn-sub">分享拓扑优化、仿真分析的设置参数和结果对比</div></div>
+      </a>
+      <a href="YOUR_DISCUSSION_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">💬</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">参与讨论</div><div class="comm-btn-sub">讨论 AI 仿真工具在工业设计验证阶段的实际效果</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ PHASE 7 ══════════════════════════════ -->
+<section class="phase-sec" id="phase7">
+  <div class="phase-hdr">
+    <div class="ph-num">07</div>
+    <div class="ph-info">
+      <div class="ph-title"><span class="ph-dot" style="background:var(--p7)"></span>展示与交付 · Presentation & Delivery</div>
+      <div class="ph-sub">汇报设计 · 视频演示 · 文档生成 · 设计叙事</div>
+    </div>
+    <div class="ph-cnt">8 工具</div>
+  </div>
+  <div class="tools-grid">
+    <a href="https://www.figma.com" target="_blank" class="tool-card" style="--pc:var(--p7)"><div class="t-name">Figma AI</div><div class="t-tags"><span class="tag hl">UI原型</span><span class="tag">交付规范</span></div><div class="t-desc">设计协作与原型标准平台，AI 辅助自动生成界面布局、整理设计规范，适合包含数字界面的产品完整交付。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/Desktop</span></div></a>
+    <a href="https://www.gamma.app" target="_blank" class="tool-card" style="--pc:var(--p7)"><div class="t-name">Gamma</div><div class="t-tags"><span class="tag hl">AI演示文稿</span><span class="tag">设计汇报</span></div><div class="t-desc">AI 一键生成精美演示文稿，输入设计项目大纲即可获得专业排版的汇报幻灯片，适合设计评审展示。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://runwayml.com" target="_blank" class="tool-card" style="--pc:var(--p7)"><div class="t-name">Runway ML</div><div class="t-tags"><span class="tag hl">AI视频生成</span><span class="tag">产品动画</span></div><div class="t-desc">AI 视频生成与编辑平台，从静态产品渲染图生成展示动画，制作设计概念影片，提升作品集展示层次。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://pika.art" target="_blank" class="tool-card" style="--pc:var(--p7)"><div class="t-name">Pika Labs</div><div class="t-tags"><span class="tag hl">图生视频</span><span class="tag">动效演示</span></div><div class="t-desc">将产品效果图转化为有动感的展示短视频，通过文字描述控制运动方式，为设计汇报增添动态维度。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://tome.app" target="_blank" class="tool-card" style="--pc:var(--p7)"><div class="t-name">Tome</div><div class="t-tags"><span class="tag hl">设计叙事</span><span class="tag">互动展示</span></div><div class="t-desc">AI 辅助构建设计故事叙事型展示，帮助设计师将研究洞见、概念过程和最终方案串联成引人入胜的线索。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.beautiful.ai" target="_blank" class="tool-card" style="--pc:var(--p7)"><div class="t-name">Beautiful.ai</div><div class="t-tags"><span class="tag hl">智能排版</span><span class="tag">设计幻灯片</span></div><div class="t-desc">AI 自动维持幻灯片排版平衡，拖入内容自动优化布局，快速制作视觉一致、专业美观的成果汇报。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web</span></div></a>
+    <a href="https://www.miro.com" target="_blank" class="tool-card" style="--pc:var(--p7)"><div class="t-name">Miro (过程展板)</div><div class="t-tags"><span class="tag hl">过程文档</span><span class="tag">设计旅程</span></div><div class="t-desc">将完整设计思维流程可视化为可交互展示板，记录从研究、发散到收敛的设计决策过程。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/Desktop</span></div></a>
+    <a href="https://www.notion.so" target="_blank" class="tool-card" style="--pc:var(--p7)"><div class="t-name">Notion AI (设计报告)</div><div class="t-tags"><span class="tag hl">文档生成</span><span class="tag">报告撰写</span></div><div class="t-desc">AI 辅助撰写设计研究报告、设计规范文档和项目提案，从笔记和数据自动整合生成结构化交付文档。</div><div class="t-meta"><span class="t-price fm">Freemium</span><span class="t-plat">Web/Desktop</span></div></a>
+  </div>
+  <div class="comm-module" style="--pc:var(--p7)">
+    <div class="comm-top"><span class="comm-dot"></span><span class="comm-title-t">展示与交付阶段 · 参考案例与教程</span></div>
+    <div class="comm-sub">精选学习资源 · 分享作品集与展示视频</div>
+    <div class="tut-grid">
+      <a href="https://vizcom.com/blog/improve-design-portfolio" target="_blank" class="tut-card" style="--pc:var(--p7)">
+        <span class="tut-type tutorial">教程</span>
+        <div class="tut-title">Vizcom：如何用 AI 设计工具改善你的作品集——过程展示与叙事策略</div>
+        <div class="tut-src">vizcom.com · 英文 · 2025</div>
+      </a>
+      <a href="https://www.figma.com/resource-library/ai-for-product-design/" target="_blank" class="tut-card" style="--pc:var(--p7)">
+        <span class="tut-type tutorial">教程</span>
+        <div class="tut-title">Figma 官方：AI 在产品设计 7 大应用场景——从研究到交付</div>
+        <div class="tut-src">figma.com · 英文 · 2025</div>
+      </a>
+      <a href="https://www.dezeen.com/2024/05/07/nike-ai-model-john-hoke/" target="_blank" class="tut-card" style="--pc:var(--p7)">
+        <span class="tut-type case">案例</span>
+        <div class="tut-title">Dezeen 专访：Nike 首席创新官谈 AI 设计未来——"创造不可能"的新炼金术</div>
+        <div class="tut-src">dezeen.com · 英文 · 2024</div>
+      </a>
+    </div>
+    <div class="comm-actions">
+      <a href="YOUR_AIRTABLE_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">🎬</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">上传案例 / 教程</div><div class="comm-btn-sub">分享 AI 辅助制作的展示视频、汇报模板或作品集页面</div></div>
+      </a>
+      <a href="YOUR_DISCUSSION_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">💬</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">参与讨论</div><div class="comm-btn-sub">讨论如何用 AI 提升毕业设计和作品集的展示质量</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ ENTERPRISE CASES ══════════════════════════════ -->
+<section class="cases-sec phase-sec" id="enterprise">
+  <div class="phase-hdr">
+    <div class="ph-num">★</div>
+    <div class="ph-info">
+      <div class="ph-title"><span class="ph-dot" style="background:var(--p8)"></span>企业 AI 工业设计案例库 · Enterprise Case Library</div>
+      <div class="ph-sub">国内外真实案例 · 附原始来源链接 · 产教融合参考</div>
+    </div>
+    <div class="ph-cnt" style="border-color:var(--p8);color:var(--p8)">16 案例</div>
+  </div>
+  <p class="cases-intro">收集国内外企业在工业设计领域 AI 赋能的真实项目案例，每条案例均附原始来源链接，供深入阅读。涵盖汽车、消费电子、运动装备、家居电器等多个品类。</p>
+  <div class="cases-filter">
+    <button class="filter-btn active" onclick="filterCases('all',this)">全部</button>
+    <button class="filter-btn" onclick="filterCases('国际',this)">🌍 国际企业</button>
+    <button class="filter-btn" onclick="filterCases('中国',this)">🇨🇳 中国企业</button>
+    <button class="filter-btn" onclick="filterCases('汽车',this)">🚗 汽车</button>
+    <button class="filter-btn" onclick="filterCases('消费品',this)">📦 消费品</button>
+    <button class="filter-btn" onclick="filterCases('运动',this)">⚡ 运动</button>
+    <button class="filter-btn" onclick="filterCases('家居',this)">🏠 家居</button>
+  </div>
+  <div class="cases-grid" id="casesGrid">
+
+    <div class="case-card" data-cat="国际 运动" style="--cstart:#ff6b3d;--cend:#ff4aaa">
+      <div class="case-header"><span class="case-company">Nike</span><span class="case-region">🌍 美国</span></div>
+      <div class="case-title">A.I.R — Athlete Imagined Revolution</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p6);border-color:var(--p6)">生成式设计</span><span class="tag">运动鞋设计</span><span class="tag">3D打印</span></div>
+      <div class="case-desc">Nike 为 13 位顶级运动员（含 Sha'Carri Richardson、Kylian Mbappé）量身定制 AI 概念跑鞋。将运动员个性数据输入生成式 AI 模型生成数百种概念图，再结合 3D 打印和参数化设计快速原型化，标志"运动员想象力驱动设计"的新范式。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">13</div><div class="impact-l">运动员定制</div></div>
+        <div class="impact-item"><div class="impact-n">100+</div><div class="impact-l">AI概念图/人</div></div>
+        <div class="impact-item"><div class="impact-n">数天</div><div class="impact-l">概念→原型</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024 · Paris Olympics</span>
+        <a href="https://about.nike.com/en/magazine/nike-design-athlete-imagined-revolution" target="_blank" class="case-src">Nike 官方 →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="国际 汽车" style="--cstart:#4ab8ff;--cend:#a855f7">
+      <div class="case-header"><span class="case-company">BMW</span><span class="case-region">🌍 德国</span></div>
+      <div class="case-title">AI 驱动数字孪生工厂与车型设计加速</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p3);border-color:var(--p3)">数字孪生</span><span class="tag">AI仿真</span><span class="tag">AIQX质量检测</span></div>
+      <div class="case-desc">BMW 与 Siemens 合作，利用 AI 将汽车空气动力学仿真提速 30 倍。AIQX 平台 AI 自动化质量检测，结合虚拟工厂规划在新车上市前完成全流程数字验证。计划 2027 年前推出 40+ 款新车型。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">30×</div><div class="impact-l">仿真提速</div></div>
+        <div class="impact-item"><div class="impact-n">40+</div><div class="impact-l">2027年新车型</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024–2025</span>
+        <a href="https://digitaldefynd.com/IQ/bmw-using-ai-case-study/" target="_blank" class="case-src">DigitalDefynd →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="国际 运动 消费品" style="--cstart:#3cffc8;--cend:#4ab8ff">
+      <div class="case-header"><span class="case-company">New Balance</span><span class="case-region">🌍 美国</span></div>
+      <div class="case-title">Vizcom 驱动的运动鞋 CMF 快速迭代</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p2);border-color:var(--p2)">CMF探索</span><span class="tag">草图转渲染</span><span class="tag">材质模拟</span></div>
+      <div class="case-desc">New Balance 设计团队将 Vizcom 集成到鞋类设计工作流，从手绘草图直接生成不同材质和配色的高保真渲染，在进入实体打样前完成多轮 CMF 方案比选，显著压缩物料成本和决策周期。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">50%+</div><div class="impact-l">样品减少</div></div>
+        <div class="impact-item"><div class="impact-n">秒级</div><div class="impact-l">CMF迭代</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024</span>
+        <a href="https://vizcom.com/solutions/industrial-design" target="_blank" class="case-src">Vizcom 案例 →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="国际 汽车" style="--cstart:#a855f7;--cend:#ff4aaa">
+      <div class="case-header"><span class="case-company">Nissan</span><span class="case-region">🌍 日本</span></div>
+      <div class="case-title">生成式 AI 平台压缩汽车 R&D 周期</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p4);border-color:var(--p4)">生成式AI研发</span><span class="tag">造型探索</span></div>
+      <div class="case-desc">日产开发内部生成式 AI 设计平台，将造型师草图和工程约束参数化，AI 自动生成满足气动性能、制造可行性的多种造型方向，整体 R&D 时间线明显压缩，工程师与造型师协同效率显著提升。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">↓30%</div><div class="impact-l">R&D周期</div></div>
+        <div class="impact-item"><div class="impact-n">多向</div><div class="impact-l">AI造型探索</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024–2025</span>
+        <a href="https://digitaldefynd.com/IQ/ai-in-automotive-industry-case-studies/" target="_blank" class="case-src">DigitalDefynd →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="国际 消费品" style="--cstart:#c8f03c;--cend:#3cffc8">
+      <div class="case-header"><span class="case-company">Ford</span><span class="case-region">🌍 美国</span></div>
+      <div class="case-title">Vizcom AI 助力车身内外饰设计提速</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p1);border-color:var(--p1)">草图可视化</span><span class="tag">内外饰设计</span><span class="tag">全球协作</span></div>
+      <div class="case-desc">福特设计团队将 Vizcom 嵌入汽车内外饰设计流程，手绘创意草图秒变照片级渲染，利用云端协作在全球设计中心之间快速分享和迭代设计方向，大幅降低早期设计沟通成本。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">全球</div><div class="impact-l">协作中心</div></div>
+        <div class="impact-item"><div class="impact-n">秒级</div><div class="impact-l">草图转渲染</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2023–2024</span>
+        <a href="https://vizcom.com/blog/ai-for-product-designers" target="_blank" class="case-src">Vizcom Blog →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="国际 运动 消费品" style="--cstart:#ff4aaa;--cend:#a855f7">
+      <div class="case-header"><span class="case-company">Adidas</span><span class="case-region">🌍 德国</span></div>
+      <div class="case-title">消费者共创数据驱动设计趋势预测</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p5);border-color:var(--p5)">机器学习</span><span class="tag">趋势预测</span><span class="tag">消费者共创</span></div>
+      <div class="case-desc">阿迪达斯利用消费者生成的设计数据训练机器学习模型，通过分析用户自主设计的配色和图案，预测下季设计趋势，使产品开发团队能更精准把握市场需求，实现数据驱动的产品创新决策。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">数据</div><div class="impact-l">消费者共创</div></div>
+        <div class="impact-item"><div class="impact-n">精准</div><div class="impact-l">趋势预测</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024</span>
+        <a href="https://www.bestpractice.ai/ai-case-study-best-practice/adidas_learns_from_its_consumers'_design_creation_to_better_anticipate_future_demand_trends_using_machine_learning" target="_blank" class="case-src">BestPractice.ai →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="国际 消费品" style="--cstart:#ffd93d;--cend:#ff6b3d">
+      <div class="case-header"><span class="case-company">Airbus</span><span class="case-region">🌍 欧洲</span></div>
+      <div class="case-title">仿生隔板：全球最大 3D 打印飞机舱内组件</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p8);border-color:var(--p8)">生成式设计</span><span class="tag">轻量化结构</span><span class="tag">增材制造</span></div>
+      <div class="case-desc">空客与 Autodesk 合作，使用生成式设计技术为 A320 机舱设计新型"仿生隔板"，AI 在满足强度标准的前提下自动生成最轻量结构形式，最终方案重量减轻 45%，同时通过所有认证标准测试，成为制造业生成式设计标杆案例。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">-45%</div><div class="impact-l">重量减轻</div></div>
+        <div class="impact-item"><div class="impact-n">465k吨</div><div class="impact-l">年减碳潜力</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2015–2024</span>
+        <a href="https://www.research.autodesk.com/projects/bionic-partition/" target="_blank" class="case-src">Autodesk Research →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="国际 消费品" style="--cstart:#4afff0;--cend:#4ab8ff">
+      <div class="case-header"><span class="case-company">IKEA</span><span class="case-region">🌍 瑞典</span></div>
+      <div class="case-title">AI 辅助家具产品配置与场景可视化</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p7);border-color:var(--p7)">AI渲染</span><span class="tag">场景配置</span><span class="tag">用户共创</span></div>
+      <div class="case-desc">宜家引入 AI 室内场景生成工具，用户描述房间风格后 AI 自动匹配推荐产品组合并生成家装效果图。设计团队使用 AI 快速生成不同色彩和材质版本的产品展示图，减少实体样品制作成本。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">个性化</div><div class="impact-l">用户体验</div></div>
+        <div class="impact-item"><div class="impact-n">降低</div><div class="impact-l">样品制作成本</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024–2025</span>
+        <a href="https://www.dezeen.com/2024/05/07/nike-ai-model-john-hoke/" target="_blank" class="case-src">Dezeen 报道 →</a>
+      </div>
+    </div>
+
+    <!-- 中国企业 -->
+    <div class="case-card" data-cat="中国 消费品" style="--cstart:#ff6b3d;--cend:#ffd93d">
+      <div class="case-header"><span class="case-company">小米 Xiaomi</span><span class="case-region">🇨🇳 中国</span></div>
+      <div class="case-title">AI 赋能 MIoT 生态产品系统化设计</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p6);border-color:var(--p6)">生态系统设计</span><span class="tag">AI辅助CMF</span><span class="tag">跨品类一致性</span></div>
+      <div class="case-desc">小米将 AI 工具嵌入 MIoT 生态产品设计研发流程，通过机器学习分析用户数据生成差异化配色，用生成式 AI 保持 420+ 家生态链企业的 CMF 风格一致性，支撑全球 6.8 亿台设备的视觉语言统一。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">6.8亿</div><div class="impact-l">生态接入设备</div></div>
+        <div class="impact-item"><div class="impact-n">420+</div><div class="impact-l">生态链企业</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024–2025</span>
+        <a href="https://www.woshipm.com/ai/6282804.html" target="_blank" class="case-src">人人都是产品经理 →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="中国 消费品 家居" style="--cstart:#c8f03c;--cend:#4afff0">
+      <div class="case-header"><span class="case-company">华为 Huawei</span><span class="case-region">🇨🇳 中国</span></div>
+      <div class="case-title">鸿蒙智家 AI 管家驱动的产品交互设计</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p1);border-color:var(--p1)">交互设计</span><span class="tag">AI管家</span><span class="tag">全屋智能</span></div>
+      <div class="case-desc">华为全屋智能引入家庭 AI 管家，需求预测准确率 92%，能耗自主优化率提升 40%。设计团队借助生成式 AI 快速迭代多品类产品的交互界面和硬件外观，在精装房市场渗透率达 41%。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">92%</div><div class="impact-l">需求预测准确</div></div>
+        <div class="impact-item"><div class="impact-n">41%</div><div class="impact-l">精装房渗透率</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024–2025</span>
+        <a href="http://www.pinpai-bang.com/scfx/n162031492.html" target="_blank" class="case-src">品牌榜报告 →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="中国 家居" style="--cstart:#4ab8ff;--cend:#3cffc8">
+      <div class="case-header"><span class="case-company">海尔智家</span><span class="case-region">🇨🇳 中国</span></div>
+      <div class="case-title">三翼鸟平台 AI 驱动的全屋场景化设计</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p3);border-color:var(--p3)">场景化设计</span><span class="tag">数字孪生</span><span class="tag">适老化</span></div>
+      <div class="case-desc">海尔三翼鸟整合 2.3 万家生态资源商，AI 实现全流程服务闭环。搭载脑机接口技术的智慧卧室将睡眠质量优化率提升至 73%，AI 跌倒检测系统助力适老化改造套餐占营收 32%，客单价突破 28 万元。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">73%</div><div class="impact-l">睡眠优化率</div></div>
+        <div class="impact-item"><div class="impact-n">280%</div><div class="impact-l">适老市场增长</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024–2025</span>
+        <a href="https://36kr.com/p/3113532148465160" target="_blank" class="case-src">36氪报道 →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="中国 消费品" style="--cstart:#a855f7;--cend:#ff6b3d">
+      <div class="case-header"><span class="case-company">美的集团</span><span class="case-region">🇨🇳 中国</span></div>
+      <div class="case-title">AI 大模型驱动的家电产品开发加速</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p4);border-color:var(--p4)">AI产品开发</span><span class="tag">用户行为预测</span></div>
+      <div class="case-desc">美的集团部署 AI 大模型于产品开发全流程，通过分析亿级用户使用行为数据辅助产品功能和交互设计决策，AI 辅助生成多品类电器的外观设计方案，加速从用户需求到产品上市的周期。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">1476亿</div><div class="impact-l">智能家居收入</div></div>
+        <div class="impact-item"><div class="impact-n">加速</div><div class="impact-l">产品上市周期</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024</span>
+        <a href="https://36kr.com/p/3625771276043523" target="_blank" class="case-src">36氪企业AI报告 →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="中国 汽车" style="--cstart:#ffd93d;--cend:#3cffc8">
+      <div class="case-header"><span class="case-company">比亚迪 BYD</span><span class="case-region">🇨🇳 中国</span></div>
+      <div class="case-title">AI 辅助电动车型内外饰造型开发</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p8);border-color:var(--p8)">汽车造型设计</span><span class="tag">AI渲染</span><span class="tag">多品牌设计语言</span></div>
+      <div class="case-desc">比亚迪设计团队引入 AI 辅助工具加速内外饰造型探索，生成式 AI 快速生成多款车型造型方案供团队筛选，数字孪生技术实现内饰交互界面与硬件造型同步验证，支撑仰望、方程豹、海鸥等多品牌差异化设计语言快速建立。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">多品牌</div><div class="impact-l">差异化设计</div></div>
+        <div class="impact-item"><div class="impact-n">加速</div><div class="impact-l">造型验证周期</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024–2025</span>
+        <a href="https://digitaldefynd.com/IQ/ai-in-automotive-industry-case-studies/" target="_blank" class="case-src">AI汽车设计报告 →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="国际 消费品" style="--cstart:#3cffc8;--cend:#a855f7">
+      <div class="case-header"><span class="case-company">Siemens</span><span class="case-region">🌍 德国</span></div>
+      <div class="case-title">NX + Azure OpenAI 工业设计 AI 副驾驶</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p2);border-color:var(--p2)">AI副驾驶</span><span class="tag">CAD智能助手</span></div>
+      <div class="case-desc">西门子与微软合作，将 Azure OpenAI 集成进 Siemens NX，为工业设计和工程师提供 AI 副驾驶助手，支持自然语言驱动 CAD 操作、智能设计建议和制造工艺优化。富士康同步推进"未来工厂"数字孪生建设。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">AI副驾</div><div class="impact-l">CAD智能操控</div></div>
+        <div class="impact-item"><div class="impact-n">企业级</div><div class="impact-l">产线部署</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024–2025</span>
+        <a href="https://www.articsledge.com/post/ai-manufacturing" target="_blank" class="case-src">AI制造业报告 →</a>
+      </div>
+    </div>
+
+    <div class="case-card" data-cat="中国 消费品" style="--cstart:#4afff0;--cend:#c8f03c">
+      <div class="case-header"><span class="case-company">大疆 DJI</span><span class="case-region">🇨🇳 中国</span></div>
+      <div class="case-title">AI 驱动的无人机形态与交互系统设计</div>
+      <div class="case-tags"><span class="tag" style="color:var(--p7);border-color:var(--p7)">产品系统设计</span><span class="tag">AI仿真</span><span class="tag">跨产品线CMF</span></div>
+      <div class="case-desc">大疆在 Mavic、Mini 系列无人机研发中引入 AI 辅助工具，生成式 AI 探索气动性能与美学造型的平衡点，CFD 仿真结合 AI 优化实现机身轻量化，同时 AI 辅助建立跨产品线统一的交互语言和 CMF 设计规范。</div>
+      <div class="case-impact">
+        <div class="impact-item"><div class="impact-n">气动</div><div class="impact-l">AI形态优化</div></div>
+        <div class="impact-item"><div class="impact-n">统一</div><div class="impact-l">跨产品线CMF</div></div>
+      </div>
+      <div class="case-footer">
+        <span class="case-year">2024–2025</span>
+        <a href="https://www.designboom.com/design/nike-air-3d-printed-sneakers-ai-math-algorithms-interview-john-hoke-04-13-2024/" target="_blank" class="case-src">Designboom →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Enterprise Community -->
+  <div class="comm-module" style="--pc:var(--p8);margin-top:16px;">
+    <div class="comm-top"><span class="comm-dot" style="background:var(--p8)"></span><span class="comm-title-t">企业案例库 · 共建征集</span></div>
+    <div class="comm-sub">投稿新案例 · 补充案例细节 · 参与产教融合讨论</div>
+    <div class="comm-actions">
+      <a href="YOUR_AIRTABLE_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">🏢</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">投稿新案例</div><div class="comm-btn-sub">推荐你了解的 AI 赋能工业设计企业案例，附资料来源</div></div>
+      </a>
+      <a href="YOUR_DISCUSSION_FORM_URL_HERE" target="_blank" class="comm-btn">
+        <span class="comm-icon">💬</span>
+        <div class="comm-btn-info"><div class="comm-btn-title">案例深度讨论</div><div class="comm-btn-sub">分析案例中的 AI 工具选型、流程创新与行业启示</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">ID<span>AI</span>KIT</div>
+      <div class="footer-meta">
+        西安交通大学 · 本科教学改革研究项目<br>
+        以产教融合为导向的生成式 AI 赋能工业设计课程改革<br>
+        最后更新 · 2026.04.16 · 开源共享 · 欢迎贡献
+      </div>
+    </div>
+    <div class="footer-right">
+      64 AI 工具 · 7 设计阶段 · 16 企业案例<br>
+      Industrial Design Department · XJTU<br><br>
+      <a href="#">GitHub</a> · <a href="#">反馈建议</a> · <a href="#" onclick="openDeployGuide();return false;">📤 发布指南</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════ DEPLOY GUIDE MODAL ══════════════════ -->
+<div class="modal-overlay" id="deployModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('deployModal')">✕</button>
+    <h3>📤 如何实现真实上传功能</h3>
+    <div class="modal-sub">发布指南 · 让学生真正可以提交内容</div>
+
+    <p style="font-size:13px;color:var(--muted2);line-height:1.8;margin-bottom:20px;">
+      静态 HTML 文件本身无法存储数据。要让学生<strong style="color:var(--text)">真实提交案例</strong>并让其他用户看到，你需要将本网站配合一个<strong style="color:var(--accent)">在线表单后台</strong>使用。以下是两种最简单的方案：
+    </p>
+
+    <div class="option-row">
+      <div class="option-card">
+        <span class="option-tag">推荐 · 最简单</span>
+        <h4>方案 A：Airtable 表单</h4>
+        <p>① 注册 <a href="https://airtable.com" target="_blank" style="color:var(--accent2)">airtable.com</a>（免费）<br>
+        ② 创建 Base → 添加字段（姓名/标题/类型/工具/描述/附件）<br>
+        ③ 点击 Share → 创建公开表单链接<br>
+        ④ 将链接替换页面中所有 <code>YOUR_AIRTABLE_FORM_URL_HERE</code><br>
+        ⑤ 老师在 Airtable 后台审核后，手动更新网页中的已展示案例</p>
+      </div>
+      <div class="option-card">
+        <span class="option-tag">自动化 · 稍复杂</span>
+        <h4>方案 B：Notion 表单</h4>
+        <p>① 在 Notion 中创建数据库<br>
+        ② 安装 <a href="https://notionforms.io" target="_blank" style="color:var(--accent2)">NotionForms</a> 插件生成公开表单<br>
+        ③ 表单提交自动进入 Notion 数据库<br>
+        ④ 将表单链接替换页面中的占位符<br>
+        ⑤ 可设置审核工作流，审核通过后自动展示</p>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">
+      <div class="deploy-step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">部署网页到 GitHub Pages（免费）</div>
+          <div class="step-desc">注册 <a href="https://github.com" target="_blank">GitHub</a> → 创建仓库 → 上传 <code>id_ai_toolkit_v3.html</code> → Settings → Pages → 选择 main 分支 → 保存。几分钟后网站会分配一个公开 URL，所有学生均可访问。</div>
+        </div>
+      </div>
+      <div class="deploy-step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">创建 Airtable 表单并替换链接</div>
+          <div class="step-desc">在 HTML 文件中搜索 <code>YOUR_AIRTABLE_FORM_URL_HERE</code>（共 14 处），替换为你创建的 Airtable 表单链接。推荐创建两个表单：一个用于案例/教程上传，一个用于讨论留言。</div>
+        </div>
+      </div>
+      <div class="deploy-step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">设置 Airtable 字段（建议）</div>
+          <div class="step-desc">案例表单字段：<code>姓名/学号</code>、<code>标题</code>、<code>类型</code>（单选）、<code>所属阶段</code>（单选）、<code>涉及工具</code>、<code>描述</code>、<code>文件链接</code>（学生可提交网盘链接）、<code>状态</code>（待审核/已发布）。Airtable 免费版支持最多 1,000 条记录，足够一学年使用。</div>
+        </div>
+      </div>
+      <div class="deploy-step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">可选：将审核通过的案例添加到网页</div>
+          <div class="step-desc">审核通过的学生案例，可手动添加到对应阶段的 <code>.tut-grid</code> 区域中（复制一个 <code>tut-card</code> 组件即可），然后重新上传 HTML 到 GitHub Pages 更新网站。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Cursor
+const cur=document.getElementById('cur'),curR=document.getElementById('curR');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function a(){rx+=(mx-rx)*.11;ry+=(my-ry)*.11;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(a);})();
+document.querySelectorAll('a,button,input').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.width='18px';cur.style.height='18px';curR.style.width='50px';curR.style.height='50px';});
+  el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';curR.style.width='32px';curR.style.height='32px';});
+});
+
+// IntersectionObserver
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('vis');
+      const id=e.target.id;
+      document.querySelectorAll('.nav-btn').forEach(b=>{
+        if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(id))b.classList.add('active');
+        else if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes('scrollTo_'))b.classList.remove('active');
+      });
+    }
+  });
+},{threshold:.07,rootMargin:'-60px 0px 0px 0px'});
+document.querySelectorAll('.phase-sec').forEach(s=>obs.observe(s));
+
+// Nav
+function scrollTo_(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});}
+
+// Search
+document.getElementById('searchInput').addEventListener('input',function(){
+  const q=this.value.toLowerCase().trim();
+  document.querySelectorAll('.tool-card,.case-card,.tut-card').forEach(c=>{
+    c.style.display=(!q||c.innerText.toLowerCase().includes(q))?'':'none';
+  });
+  document.querySelectorAll('.phase-sec').forEach(s=>{
+    const vis=[...s.querySelectorAll('.tool-card,.case-card')].some(c=>c.style.display!=='none');
+    s.style.display=(!q||vis)?'':'none';
+  });
+});
+
+// Cases filter
+function filterCases(cat,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.case-card').forEach(c=>{
+    c.style.display=(cat==='all'||c.dataset.cat.includes(cat))?'':'none';
+  });
+}
+
+// Modals
+function openDeployGuide(){document.getElementById('deployModal').classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
+});
+</script>
+</body>
+</html>
