@@ -251,7 +251,6 @@ footer{position:relative;z-index:1;padding:56px 64px;border-top:1px solid var(--
     <button class="nav-btn" onclick="scrollTo_('phase6')">06·工程仿真</button>
     <button class="nav-btn" onclick="scrollTo_('phase7')">07·展示交付</button>
     <button class="nav-btn spec active" onclick="scrollTo_('enterprise')">★ 企业案例库</button>
-    <button class="nav-btn" onclick="openDeployGuide()" style="color:var(--p6);">📤 发布指南</button>
   </div>
 </nav>
 
@@ -929,71 +928,6 @@ footer{position:relative;z-index:1;padding:56px 64px;border-top:1px solid var(--
     </div>
   </div>
 </footer>
-
-<!-- ══════════════════ DEPLOY GUIDE MODAL ══════════════════ -->
-<div class="modal-overlay" id="deployModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('deployModal')">✕</button>
-    <h3>📤 如何实现真实上传功能</h3>
-    <div class="modal-sub">发布指南 · 让学生真正可以提交内容</div>
-
-    <p style="font-size:13px;color:var(--muted2);line-height:1.8;margin-bottom:20px;">
-      静态 HTML 文件本身无法存储数据。要让学生<strong style="color:var(--text)">真实提交案例</strong>并让其他用户看到，你需要将本网站配合一个<strong style="color:var(--accent)">在线表单后台</strong>使用。以下是两种最简单的方案：
-    </p>
-
-    <div class="option-row">
-      <div class="option-card">
-        <span class="option-tag">推荐 · 最简单</span>
-        <h4>方案 A：Airtable 表单</h4>
-        <p>① 注册 <a href="https://airtable.com" target="_blank" style="color:var(--accent2)">airtable.com</a>（免费）<br>
-        ② 创建 Base → 添加字段（姓名/标题/类型/工具/描述/附件）<br>
-        ③ 点击 Share → 创建公开表单链接<br>
-        ④ 将链接替换页面中所有 <code>YOUR_AIRTABLE_FORM_URL_HERE</code><br>
-        ⑤ 老师在 Airtable 后台审核后，手动更新网页中的已展示案例</p>
-      </div>
-      <div class="option-card">
-        <span class="option-tag">自动化 · 稍复杂</span>
-        <h4>方案 B：Notion 表单</h4>
-        <p>① 在 Notion 中创建数据库<br>
-        ② 安装 <a href="https://notionforms.io" target="_blank" style="color:var(--accent2)">NotionForms</a> 插件生成公开表单<br>
-        ③ 表单提交自动进入 Notion 数据库<br>
-        ④ 将表单链接替换页面中的占位符<br>
-        ⑤ 可设置审核工作流，审核通过后自动展示</p>
-      </div>
-    </div>
-
-    <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">
-      <div class="deploy-step">
-        <div class="step-num">1</div>
-        <div class="step-body">
-          <div class="step-title">部署网页到 GitHub Pages（免费）</div>
-          <div class="step-desc">注册 <a href="https://github.com" target="_blank">GitHub</a> → 创建仓库 → 上传 <code>id_ai_toolkit_v3.html</code> → Settings → Pages → 选择 main 分支 → 保存。几分钟后网站会分配一个公开 URL，所有学生均可访问。</div>
-        </div>
-      </div>
-      <div class="deploy-step">
-        <div class="step-num">2</div>
-        <div class="step-body">
-          <div class="step-title">创建 Airtable 表单并替换链接</div>
-          <div class="step-desc">在 HTML 文件中搜索 <code>YOUR_AIRTABLE_FORM_URL_HERE</code>（共 14 处），替换为你创建的 Airtable 表单链接。推荐创建两个表单：一个用于案例/教程上传，一个用于讨论留言。</div>
-        </div>
-      </div>
-      <div class="deploy-step">
-        <div class="step-num">3</div>
-        <div class="step-body">
-          <div class="step-title">设置 Airtable 字段（建议）</div>
-          <div class="step-desc">案例表单字段：<code>姓名/学号</code>、<code>标题</code>、<code>类型</code>（单选）、<code>所属阶段</code>（单选）、<code>涉及工具</code>、<code>描述</code>、<code>文件链接</code>（学生可提交网盘链接）、<code>状态</code>（待审核/已发布）。Airtable 免费版支持最多 1,000 条记录，足够一学年使用。</div>
-        </div>
-      </div>
-      <div class="deploy-step">
-        <div class="step-num">4</div>
-        <div class="step-body">
-          <div class="step-title">可选：将审核通过的案例添加到网页</div>
-          <div class="step-desc">审核通过的学生案例，可手动添加到对应阶段的 <code>.tut-grid</code> 区域中（复制一个 <code>tut-card</code> 组件即可），然后重新上传 HTML 到 GitHub Pages 更新网站。</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
 // Cursor
